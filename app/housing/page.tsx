@@ -1,46 +1,46 @@
-import HousingCard from "@/components/housing/HousingCard";
+import SearchFilters from "@/components/housing/SearchFilters";
+import { supabase } from "@/lib/supabase";
+import ListingCard from "@/components/housing/ListingCard";
 
-export default function HousingPage() {
+export const dynamic = "force-dynamic";
+export default async function HousingPage() {
+  const { data: rentals, error } = await supabase
+    .from("rentals")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) {
+    return <p className="p-8">Unable to load listings: {error.message}</p>;
+  }
+  
+
   return (
-    <main className="min-h-screen bg-[#f7f8f5] px-6 py-12">
-      <div className="mx-auto max-w-7xl">
-        <h1 className="text-5xl font-black text-[#064d2b]">
-          Housing
-        </h1>
+    <main className="p-8">
+<h1 className="text-3xl font-bold">Housing Listings</h1>
 
-        <p className="mt-4 text-xl text-slate-600">
-          Find rooms, apartments, houses, and roommate opportunities.
-        </p>
+<div className="mt-6">
+  <SearchFilters />
+</div>
 
-        <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          <HousingCard
-            href="/housing/apartments"
-            image="/housing/apartments/apartment1.jpg"
-            title="🏢 Apartments"
-            description="Find apartments across DC, Maryland, and Virginia."
-          />
-
-          <HousingCard
-            href="/housing/houses"
-            image="/housing/houses/house1.jpg"
-            title="🏠 Houses"
-            description="Browse single-family homes and townhouses."
-          />
-
-          <HousingCard
-            href="/housing/rooms"
-            image="/housing/rooms/room1.jpg"
-            title="🛏️ Rooms for Rent"
-            description="Private rooms, shared rooms, and basement rooms."
-          />
-
-          <HousingCard
-            href="/housing/roommates"
-            image="/housing/roommates/room-share1.jpg"
-            title="👥 Roommates"
-            description="Find roommates and shared housing opportunities."
-          />
-        </div>
+<div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+{rentals?.map((rental) => (
+<ListingCard
+  key={rental.id}
+  id={rental.id}
+  href={`/housing/${rental.id}`}
+  image={
+  rental.image_url ||
+  "/housing/apartments/apartment1.jpg"
+}
+  title={rental.title}
+  location={rental.location ?? "Location not provided"}
+  price={Number(rental.price ?? 0)}
+  bedrooms={rental.bedrooms}
+  bathrooms={rental.bathrooms}
+  description={rental.description ?? ""}
+  propertyType={rental.property_type}
+  createdAt={rental.created_at}
+/>
+))}
       </div>
     </main>
   );

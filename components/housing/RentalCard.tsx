@@ -6,6 +6,10 @@ type RentalCardProps = {
   price: string;
   location: string;
   description: string;
+  beds?: number;
+  baths?: number;
+  sqft?: number;
+  available?: boolean;
 };
 
 export default function RentalCard({
@@ -14,6 +18,10 @@ export default function RentalCard({
   price,
   location,
   description,
+  beds,
+  baths,
+  sqft,
+  available = true,
 }: RentalCardProps) {
   return (
     <div className="overflow-hidden rounded-2xl bg-white shadow transition hover:shadow-lg">
@@ -35,6 +43,17 @@ export default function RentalCard({
         <p className="mt-2 text-slate-500">
           📍 {location}
         </p>
+        <div className="mt-3 flex gap-4 text-sm text-slate-600">
+  {beds && <span>🛏️ {beds} Bed</span>}
+  {baths && <span>🚿 {baths} Bath</span>}
+  {sqft && <span>📐 {sqft} sq ft</span>}
+</div>
+
+{available && (
+  <span className="mt-3 inline-block rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">
+    Available Now
+  </span>
+)}
 
         <p className="mt-3 text-sm text-slate-600">
           {description}

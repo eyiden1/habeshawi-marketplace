@@ -1,24 +1,279 @@
+"use client";
+
+import { supabase } from "@/lib/supabase";
+
 export default function PostAdPage() {
+  async function handleSubmit(
+  event: React.FormEvent<HTMLFormElement>
+) {
+  event.preventDefault();
+
+  const form = event.currentTarget;
+  const formData = new FormData(form);
+
+  const bedroomsValue = formData.get("bedrooms");
+  const bathroomsValue = formData.get("bathrooms");
+  const imageFile = formData.get("photos");
+
+  let imageUrl: string | null = null;
+
+  if (imageFile instanceof File && imageFile.size > 0) {
+    if (imageFile.size > 5 * 1024 * 1024) {
+      alert("Image must be 5 MB or smaller.");
+      return;
+    }
+
+    const extension =
+      imageFile.name.split(".").pop()?.toLowerCase() ?? "jpg";
+
+    const filePath = `rentals/${crypto.randomUUID()}.${extension}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("housing-images")
+      .upload(filePath, imageFile, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (uploadError) {
+      alert(`Unable to upload image: ${uploadError.message}`);
+      return;
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from("housing-images")
+      .getPublicUrl(filePath);
+
+    imageUrl = publicUrlData.publicUrl;
+  }
+
+  const { error } = await supabase.from("rentals").insert({
+    title: formData.get("title"),
+    property_type: formData.get("property_type"),
+    price: Number(formData.get("price")),
+    location: formData.get("location"),
+    bedrooms: bedroomsValue ? Number(bedroomsValue) : null,
+    bathrooms: bathroomsValue ? Number(bathroomsValue) : null,
+    description: formData.get("description"),
+    phone: formData.get("phone"),
+    whatsapp: formData.get("whatsapp"),
+    email: formData.get("email"),
+    image_url: imageUrl,
+  });
+
+  if (error) {
+    alert(`Unable to submit rental: ${error.message}`);
+    return;
+  }
+
+  alert("Rental submitted successfully!");
+  form.reset();
+}
   return (
     <main className="min-h-screen bg-[#f7f8f5] px-6 py-12">
-      <div className="mx-auto max-w-4xl">
-        <h1 className="text-5xl font-black text-[#064d2b]">
-          Post an Ad
+      <div className="mx-auto max-w-3xl rounded-2xl bg-white p-8 shadow">
+        <h1 className="text-4xl font-bold text-[#064d2b]">
+          Post a Rental
         </h1>
 
-        <p className="mt-4 text-xl text-slate-600">
-          Create a new listing for the Habeshawi Marketplace.
+        <p className="mt-3 text-slate-600">
+          Add your apartment, house, room, or roommate listing.
         </p>
 
-        <div className="mt-10 rounded-2xl bg-white p-8 shadow border">
-          <p className="text-lg font-semibold">
-            Posting form coming soon
-          </p>
+        <form onSubmit={handleSubmit} className="mt-8 grid gap-5">
+          <input
+            type="text"
+            name="title"
+            placeholder="Example: 2-bedroom apartment in Silver Spring"
+            required
+            className="w-full rounded-lg border border-slate-300 px-4 py-3"
+          />
 
-          <p className="mt-3 text-slate-600">
-            Users will be able to post items, jobs, housing, services, and businesses from this page.
-          </p>
-        </div>
+          <select
+            name="property_type"
+            required
+            defaultValue=""
+            className="rounded-lg border border-slate-300 px-4 py-3"
+          >
+            <option value="" disabled>
+              Property type
+            </option>
+            <option value="apartment">Apartment</option>
+            <option value="house">House</option>
+            <option value="room">Room</option>
+            <option value="roommate">Roommate</option>
+          </select>
+
+          <input
+            type="number"
+            name="price"
+            min="0"
+            step="0.01"
+            placeholder="Monthly rent"
+            required
+            className="rounded-lg border border-slate-300 px-4 py-3"
+          />
+
+          <input
+            type="text"
+            name="location"
+            placeholder="Location"
+            required
+            className="rounded-lg border border-slate-300 px-4 py-3"
+          />
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <input
+              type="number"
+              name="bedrooms"
+              min="0"
+              placeholder="Bedrooms"
+              className="rounded-lg border border-slate-300 px-4 py-3"
+            />
+
+            <input
+              type="number"
+              name="bathrooms"
+              min="0"
+              step="0.5"
+              placeholder="Bathrooms"
+              className="rounded-lg border border-slate-300 px-4 py-3"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="available_date"
+              className="mb-2 block font-semibold text-slate-700"
+            >
+              Available Date
+            </label>
+
+            <input
+              id="available_date"
+              type="date"
+              name="available_date"
+              className="w-full rounded-lg border border-slate-300 px-4 py-3"
+            />
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2">
+            <input
+              type="tel"
+              name="phone"
+              placeholder="Phone Number"
+              className="rounded-lg border border-slate-300 px-4 py-3"
+            />
+
+            <input
+              type="text"
+              name="whatsapp"
+              placeholder="WhatsApp Number (Optional)"
+              className="rounded-lg border border-slate-300 px-4 py-3"
+            />
+          </div>
+
+          <input
+            type="email"
+            name="email"
+            placeholder="Email Address"
+            className="rounded-lg border border-slate-300 px-4 py-3"
+          />
+
+          <div>
+            <h2 className="mb-3 text-lg font-semibold text-[#064d2b]">
+              Amenities
+            </h2>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="amenities"
+                  value="parking"
+                />
+                Parking
+              </label>
+
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="amenities"
+                  value="utilities-included"
+                />
+                Utilities Included
+              </label>
+
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="amenities"
+                  value="wifi-included"
+                />
+                Wi-Fi Included
+              </label>
+
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="amenities"
+                  value="laundry"
+                />
+                Laundry
+              </label>
+
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="amenities"
+                  value="air-conditioning"
+                />
+                Air Conditioning
+              </label>
+
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="amenities"
+                  value="pets-allowed"
+                />
+                Pets Allowed
+              </label>
+            </div>
+          </div>
+
+          <textarea
+            name="description"
+            placeholder="Description"
+            rows={5}
+            className="rounded-lg border border-slate-300 px-4 py-3"
+          />
+
+          <div>
+            <label
+              htmlFor="photos"
+              className="mb-2 block font-semibold text-slate-700"
+            >
+              Property Photos
+            </label>
+
+            <input
+              id="photos"
+              type="file"
+              name="photos"
+              multiple
+              accept="image/*"
+              className="w-full rounded-lg border border-slate-300 px-4 py-3"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="rounded-lg bg-[#087531] px-6 py-3 font-semibold text-white hover:bg-[#064d2b]"
+          >
+            Submit Rental
+          </button>
+        </form>
       </div>
     </main>
   );

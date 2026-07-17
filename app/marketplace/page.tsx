@@ -1,5 +1,5 @@
 import PageHeader from "@/components/layout/PageHeader";
-import ListingCard from "@/components/ListingCard";
+import MarketplaceCard from "@/components/marketplace/MarketplaceCard";
 
 export default function MarketplacePage() {
   return (
@@ -36,33 +36,33 @@ export default function MarketplacePage() {
       Search
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
 
-  <ListingCard
+<MarketplaceCard
   title="Toyota Camry"
-  price="$12,500"
+  price={12500}
   location="Silver Spring, MD"
   image="/listings/car.jpg"
   href="/marketplace/toyota-camry"
 />
 
-<ListingCard
+<MarketplaceCard
   title="Living Room Sofa"
-  price="$650"
+  price={650}
   location="Washington, DC"
   image="/listings/sofa.jpg"
   href="/marketplace/living-room-sofa"
 />
 
-<ListingCard
+<MarketplaceCard
   title="iPhone for Sale"
-  price="$500"
+  price={500}
   location="Alexandria, VA"
   image="/listings/iphone.jpg"
   href="/marketplace/iphone-for-sale"
 />
 
-<ListingCard
+<MarketplaceCard
   title="Restaurant Equipment"
-  price="$4,500"
+  price={4500}
   location="Rockville, MD"
   image="/listings/restaurant-equipment.jpg"
   href="/marketplace/restaurant-equipment"

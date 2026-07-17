@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 type ListingCardProps = {
+  id: string;
   href: string;
   image: string;
   title: string;
@@ -15,6 +16,7 @@ type ListingCardProps = {
 };
 
 export default function ListingCard({
+  id,
   href,
   image,
   title,
@@ -27,8 +29,7 @@ export default function ListingCard({
   createdAt,
 }: ListingCardProps) {
   return (
-    <Link
-      href={href}
+    <div
       className="block overflow-hidden rounded-2xl bg-white shadow transition hover:-translate-y-1 hover:shadow-lg"
     >
       <div className="relative">
@@ -39,14 +40,6 @@ export default function ListingCard({
           height={350}
           className="h-56 w-full object-cover"
         />
-
-        <button
-          type="button"
-          className="absolute right-3 top-3 rounded-full bg-white p-2 shadow hover:bg-red-50"
-          aria-label="Add to favorites"
-        >
-          ❤️
-        </button>
       </div>
 
       <div className="p-4">
@@ -60,22 +53,28 @@ export default function ListingCard({
           ${price.toLocaleString()}/month
         </p>
 
-        <p className="mt-2 text-slate-500">
-          📍 {location}
-        </p>
+        <p className="mt-2">📍 {location}</p>
 
-        <p className="mt-2 text-slate-600">
+        <p className="mt-2">
           🛏 {bedrooms ?? 0} Beds • 🛁 {bathrooms ?? 0} Baths
         </p>
 
-        <p className="mt-3 line-clamp-3 text-slate-600">
+        <p className="mt-3 text-slate-600">
           {description}
         </p>
 
         <p className="mt-4 text-sm text-slate-500">
           Posted {new Date(createdAt).toLocaleDateString()}
         </p>
+        <div className="mt-4">
+<Link
+  href={`/post-ad/edit/${id}`}
+  className="inline-block rounded-lg bg-[#087531] px-4 py-2 font-semibold text-white hover:bg-[#064d2b]"
+>
+  Edit Listing
+</Link>
+</div>
       </div>
-    </Link>
+    </div>
   );
 }
