@@ -114,21 +114,14 @@ export default function ListingCard({
           Posted {new Date(createdAt).toLocaleDateString()}
         </p>
 
-        <div className="mt-6 flex gap-3">
-          <Link
-            href={href}
-            className="flex-1 rounded-lg bg-[#087531] px-4 py-2 text-center font-semibold text-white hover:bg-[#064d2b]"
-          >
-            View Details
-          </Link>
-
-          <Link
-            href={`/post-ad/edit/${id}`}
-            className="flex-1 rounded-lg border border-[#087531] px-4 py-2 text-center font-semibold text-[#087531] hover:bg-green-50"
-          >
-            Edit Listing
-          </Link>
-        </div>
+<div className="mt-6">
+  <Link
+    href={href}
+    className="block rounded-lg bg-[#087531] px-4 py-2 text-center font-semibold text-white hover:bg-[#064d2b]"
+  >
+    View Details
+  </Link>
+</div>
       </div>
     </div>
   );
