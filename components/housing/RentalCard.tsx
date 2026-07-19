@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 type RentalCardProps = {
-  id: string;
+  id?: string;
   image: string;
   title: string;
   price: string;
@@ -87,7 +87,7 @@ export default function RentalCard({
         </p>
 
         <Link
-          href={`/housing/${id}`}
+          href={id ? `/housing/${id}` : "#"}
           className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-[#087531] px-4 py-3 font-bold text-white transition hover:bg-[#064d2b]"
         >
           View Details
