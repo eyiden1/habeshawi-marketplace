@@ -1,76 +1,187 @@
 "use client";
 
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function SearchFilters() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [location, setLocation] = useState("");
-  const [propertyType, setPropertyType] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
+  const [location, setLocation] = useState(
+    searchParams.get("location") ?? "",
+  );
+
+  const [propertyType, setPropertyType] = useState(
+    searchParams.get("type") ?? "",
+  );
+
+  const [minPrice, setMinPrice] = useState(
+    searchParams.get("minPrice") ?? "",
+  );
+
+  const [maxPrice, setMaxPrice] = useState(
+    searchParams.get("maxPrice") ?? "",
+  );
+
+  const [bedrooms, setBedrooms] = useState(
+    searchParams.get("bedrooms") ?? "",
+  );
+
+  const [bathrooms, setBathrooms] = useState(
+    searchParams.get("bathrooms") ?? "",
+  );
+
+  const [sortBy, setSortBy] = useState(
+    searchParams.get("sort") ?? "newest",
+  );
 
   function handleSearch() {
-    const path = propertyType
-      ? `/housing/${propertyType}`
-      : "/housing";
-
     const params = new URLSearchParams();
 
-    if (location) {
-      params.set("location", location);
+    if (location.trim()) {
+      params.set("location", location.trim());
+    }
+
+    if (propertyType) {
+      params.set("type", propertyType);
+    }
+
+    if (minPrice) {
+      params.set("minPrice", minPrice);
     }
 
     if (maxPrice) {
       params.set("maxPrice", maxPrice);
     }
 
+    if (bedrooms) {
+      params.set("bedrooms", bedrooms);
+    }
+
+    if (bathrooms) {
+      params.set("bathrooms", bathrooms);
+    }
+
+    if (sortBy) {
+      params.set("sort", sortBy);
+    }
+
     const query = params.toString();
 
-    router.push(query ? `${path}?${query}` : path);
+    router.push(query ? `/housing?${query}` : "/housing");
+  }
+
+  function handleReset() {
+    setLocation("");
+    setPropertyType("");
+    setMinPrice("");
+    setMaxPrice("");
+    setBedrooms("");
+    setBathrooms("");
+    setSortBy("newest");
+
+    router.push("/housing");
   }
 
   return (
-    <div className="mt-8 grid gap-4 rounded-2xl bg-white p-5 shadow md:grid-cols-4">
-      <input
-        type="text"
-        value={location}
-        onChange={(event) => setLocation(event.target.value)}
-        placeholder="Search by city or neighborhood"
-        className="rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-[#087531]"
-      />
+    <div className="rounded-2xl bg-white p-6 shadow">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+        <input
+          type="text"
+          placeholder="City or neighborhood"
+          value={location}
+          onChange={(event) => setLocation(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              handleSearch();
+            }
+          }}
+          className="rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-[#087531]"
+        />
 
-      <select
-        value={propertyType}
-        onChange={(event) => setPropertyType(event.target.value)}
-        className="rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-[#087531]"
-      >
-        <option value="">Property type</option>
-        <option value="apartments">Apartment</option>
-        <option value="houses">House</option>
-        <option value="rooms">Room</option>
-        <option value="roommates">Roommate</option>
-      </select>
+        <select
+          value={propertyType}
+          onChange={(event) => setPropertyType(event.target.value)}
+          className="rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-[#087531]"
+        >
+          <option value="">Property Type</option>
+          <option value="room">Room</option>
+          <option value="apartment">Apartment</option>
+          <option value="house">House</option>
+          <option value="basement">Basement</option>
+          <option value="roommate">Roommate</option>
+          <option value="commercial">Commercial</option>
+        </select>
 
-      <select
-        value={maxPrice}
-        onChange={(event) => setMaxPrice(event.target.value)}
-        className="rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-[#087531]"
-      >
-        <option value="">Maximum price</option>
-        <option value="800">$800</option>
-        <option value="1200">$1,200</option>
-        <option value="1800">$1,800</option>
-        <option value="2500">$2,500</option>
-      </select>
+        <input
+          type="number"
+          min="0"
+          placeholder="Minimum Rent"
+          value={minPrice}
+          onChange={(event) => setMinPrice(event.target.value)}
+          className="rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-[#087531]"
+        />
 
-      <button
-        type="button"
-        onClick={handleSearch}
-        className="rounded-lg bg-[#087531] px-5 py-3 font-semibold text-white hover:bg-[#064d2b]"
-      >
-        Search Housing
-      </button>
+        <input
+          type="number"
+          min="0"
+          placeholder="Maximum Rent"
+          value={maxPrice}
+          onChange={(event) => setMaxPrice(event.target.value)}
+          className="rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-[#087531]"
+        />
+
+        <select
+          value={bedrooms}
+          onChange={(event) => setBedrooms(event.target.value)}
+          className="rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-[#087531]"
+        >
+          <option value="">Bedrooms</option>
+          <option value="1">1+ Bedroom</option>
+          <option value="2">2+ Bedrooms</option>
+          <option value="3">3+ Bedrooms</option>
+          <option value="4">4+ Bedrooms</option>
+        </select>
+
+        <select
+          value={bathrooms}
+          onChange={(event) => setBathrooms(event.target.value)}
+          className="rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-[#087531]"
+        >
+          <option value="">Bathrooms</option>
+          <option value="1">1+ Bathroom</option>
+          <option value="2">2+ Bathrooms</option>
+          <option value="3">3+ Bathrooms</option>
+        </select>
+
+        <select
+          value={sortBy}
+          onChange={(event) => setSortBy(event.target.value)}
+          className="rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-[#087531]"
+        >
+          <option value="newest">Newest</option>
+          <option value="price_low">Price: Low to High</option>
+          <option value="price_high">Price: High to Low</option>
+        </select>
+
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={handleSearch}
+            className="flex-1 rounded-lg bg-[#087531] px-4 py-3 font-semibold text-white transition hover:bg-[#064d2b]"
+          >
+            Search
+          </button>
+
+          <button
+            type="button"
+            onClick={handleReset}
+            className="rounded-lg border border-slate-300 px-4 py-3 transition hover:bg-slate-100"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

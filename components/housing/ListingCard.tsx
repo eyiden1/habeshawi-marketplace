@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import FavoriteButton from "./FavoriteButton";
 
 type ListingCardProps = {
   id: string;
@@ -34,8 +35,8 @@ export default function ListingCard({
 }: ListingCardProps) {
   return (
     <div className="overflow-hidden rounded-2xl bg-white shadow transition hover:-translate-y-1 hover:shadow-lg">
-<Link href={href} className="block">
-  <div className="relative">
+<div className="relative">
+  <Link href={href} className="block">
     <Image
       src={image}
       alt={title}
@@ -43,13 +44,24 @@ export default function ListingCard({
       height={350}
       className="h-56 w-full object-cover"
     />
+  </Link>
+
+  <div className="absolute right-3 top-3">
+    <FavoriteButton
+      rentalId={id}
+      title={title}
+    />
   </div>
-</Link>
+
+  <div className="absolute left-3 top-3">
+    <span className="rounded-full bg-[#087531] px-3 py-1 text-sm font-semibold text-white capitalize">
+      {propertyType ?? "Rental"}
+    </span>
+  </div>
+</div>
 
       <div className="p-4">
-        <span className="inline-block rounded-full bg-green-100 px-3 py-1 text-sm font-semibold capitalize text-[#087531]">
-          {propertyType ?? "Rental"}
-        </span>
+
 
         <Link href={href}>
   <h3 className="mt-3 text-lg font-bold hover:text-[#087531] hover:underline">

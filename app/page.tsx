@@ -2,7 +2,6 @@ import Categories from "@/components/Categories";
 import FeaturedListings from "@/components/FeaturedListings";
 import Hero from "@/components/Hero";
 import Header from "@/components/Header";
-import LatestJobs from "@/components/LatestJobs";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -10,24 +9,21 @@ export default function Home() {
     <main className="min-h-screen bg-[#f7f8f5] text-slate-900">
       <Header />
 
+      {/* Main rental search area */}
       <Hero />
 
+      {/* Rooms, apartments, houses, basements, and roommates */}
       <Categories />
 
+      {/* Existing rental listings */}
       <section
-        id="marketplace"
-        className="mx-auto grid max-w-7xl gap-8 px-6 pb-16 lg:grid-cols-3"
+        id="rentals"
+        className="mx-auto max-w-7xl px-6 pb-16"
       >
-       <div className="lg:col-span-2">
-         <FeaturedListings />
-       </div>
-
-        <aside id="jobs">
-          <LatestJobs />
-        </aside>
+        <FeaturedListings />
       </section>
 
-        <Footer />
+      <Footer />
     </main>
   );
 }
