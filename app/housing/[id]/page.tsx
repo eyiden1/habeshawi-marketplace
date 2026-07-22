@@ -42,9 +42,6 @@ export default async function HousingDetailsPage({
 
   const uploadedImages =
     rentalImages?.map((image) => image.image_url) ?? [];
-    console.log("Rental ID:", id);
-console.log("Rental Images:", rentalImages);
-console.log("Uploaded Images:", uploadedImages);
 
   const images =
     uploadedImages.length > 0

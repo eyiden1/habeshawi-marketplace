@@ -1,0 +1,133 @@
+import type { Job } from "@/types/job";
+
+export const sampleJobs: Job[] = [
+  {
+    id: "restaurant-server-silver-spring",
+    title: "Restaurant Server",
+    company: "Habesha Restaurant",
+    category: "Restaurant & Hospitality",
+    employmentType: "Full-time",
+    location: "Silver Spring, MD",
+    pay: "$18–$24 per hour plus tips",
+    description:
+      "Community restaurant seeking a dependable and welcoming server to greet guests, take orders, deliver food, and help maintain a clean dining area. Restaurant experience is helpful, but reliable candidates who are ready to learn are encouraged to apply.",
+    requirements: [
+      "Strong customer-service and communication skills",
+      "Availability for evenings and weekends",
+      "Ability to stand and move throughout the shift",
+      "Restaurant experience is helpful but not required",
+    ],
+    contactName: "Hiring Manager",
+    contactEmail: "jobs@example.com",
+    contactPhone: "(301) 555-0142",
+    postedAt: "Posted today",
+  },
+  {
+    id: "delivery-driver-washington-dc",
+    title: "Delivery Driver",
+    company: "Local Delivery Service",
+    category: "Driving & Delivery",
+    employmentType: "Part-time",
+    location: "Washington, DC",
+    pay: "$20 per hour",
+    description:
+      "Part-time driver needed for local deliveries throughout the DMV area. The driver will pick up and deliver packages, communicate with dispatch, and provide professional service to customers.",
+    requirements: [
+      "Valid driver license",
+      "Reliable transportation",
+      "Clean driving record",
+      "Knowledge of the Washington, DC metropolitan area",
+    ],
+    contactName: "Operations Team",
+    contactEmail: "drivers@example.com",
+    contactPhone: "(202) 555-0186",
+    postedAt: "Posted 1 day ago",
+  },
+  {
+    id: "it-support-rockville",
+    title: "IT Support Specialist",
+    company: "Technology Solutions",
+    category: "Information Technology",
+    employmentType: "Full-time",
+    location: "Rockville, MD",
+    pay: "$55,000–$70,000 per year",
+    description:
+      "Provide desktop, account, software, and basic network support for a growing local organization. The successful candidate will document issues, resolve common technical problems, and escalate complex requests when needed.",
+    requirements: [
+      "One or more years of technical-support experience",
+      "Working knowledge of Windows and Microsoft 365",
+      "Strong troubleshooting and communication skills",
+      "Ability to explain technical issues clearly",
+    ],
+    contactName: "Recruiting Team",
+    contactEmail: "careers@example.com",
+    applyUrl: "https://example.com/apply",
+    postedAt: "Posted 2 days ago",
+  },
+  {
+    id: "home-care-aide-takoma-park",
+    title: "Home Care Aide",
+    company: "Community Home Care",
+    category: "Childcare & Home Care",
+    employmentType: "Part-time",
+    location: "Takoma Park, MD",
+    pay: "$19–$22 per hour",
+    description:
+      "Compassionate caregiver needed to assist an older adult with companionship, light meal preparation, reminders, and everyday household activities. Flexible evening and weekend hours are available.",
+    requirements: [
+      "Dependable and compassionate personality",
+      "Prior caregiving experience preferred",
+      "Evening or weekend availability",
+      "Background check may be required",
+    ],
+    contactName: "Care Coordinator",
+    contactEmail: "care@example.com",
+    contactPhone: "(240) 555-0139",
+    postedAt: "Posted 3 days ago",
+  },
+  {
+    id: "grocery-cashier-hyattsville",
+    title: "Grocery Store Cashier",
+    company: "Habesha Market",
+    category: "Retail & Grocery",
+    employmentType: "Part-time",
+    location: "Hyattsville, MD",
+    pay: "$17 per hour",
+    description:
+      "Friendly cashier needed for a busy neighborhood grocery store. Responsibilities include greeting customers, operating the register, answering basic product questions, and helping keep checkout and shelf areas organized.",
+    requirements: [
+      "Friendly and professional customer service",
+      "Basic cash-handling ability",
+      "Weekend availability",
+      "Ability to lift light grocery items",
+    ],
+    contactName: "Store Manager",
+    contactEmail: "marketjobs@example.com",
+    contactPhone: "(301) 555-0191",
+    postedAt: "Posted 4 days ago",
+  },
+  {
+    id: "office-assistant-alexandria",
+    title: "Office Assistant",
+    company: "DMV Community Services",
+    category: "Office & Administration",
+    employmentType: "Full-time",
+    location: "Alexandria, VA",
+    pay: "$42,000–$48,000 per year",
+    description:
+      "Organized office assistant needed to answer calls, schedule appointments, prepare documents, maintain records, and support daily administrative operations in a community-focused office.",
+    requirements: [
+      "Strong organization and communication skills",
+      "Basic Microsoft Word and Excel skills",
+      "Professional telephone manner",
+      "Previous office experience preferred",
+    ],
+    contactName: "Office Manager",
+    contactEmail: "officejobs@example.com",
+    postedAt: "Posted 5 days ago",
+  },
+];
+
+export function getSampleJobById(id: string) {
+  return sampleJobs.find((job) => job.id === id);
+}

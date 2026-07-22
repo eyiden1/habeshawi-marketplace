@@ -125,8 +125,8 @@ export default function PostAdPage() {
         image_url: imageUrl,
 
         edit_token: editToken,
-        status: "pending",
-        payment_status: "unpaid",
+status: "draft",
+payment_status: "unpaid",
       })
       .select("id")
       .single();

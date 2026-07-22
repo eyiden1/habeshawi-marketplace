@@ -7,6 +7,8 @@ type MarketplaceCardProps = {
   title: string;
   location: string;
   price: number;
+  featured?: boolean;
+  condition?: string | null;
 };
 
 export default function MarketplaceCard({
@@ -15,28 +17,46 @@ export default function MarketplaceCard({
   title,
   location,
   price,
+  featured = false,
+  condition,
 }: MarketplaceCardProps) {
   return (
     <Link
       href={href}
-      className="block overflow-hidden rounded-2xl bg-white shadow transition hover:-translate-y-1 hover:shadow-lg"
+      className="group block overflow-hidden rounded-2xl bg-white shadow transition hover:-translate-y-1 hover:shadow-xl"
     >
-      <Image
-        src={image}
-        alt={title}
-        width={500}
-        height={350}
-        className="h-56 w-full object-cover"
-      />
+      <div className="relative">
+        <Image
+          src={image || "/images/placeholder.jpg"}
+          alt={title}
+          width={500}
+          height={350}
+          className="h-56 w-full object-cover transition duration-300 group-hover:scale-105"
+        />
 
-      <div className="p-4">
-        <h3 className="text-lg font-bold">{title}</h3>
+        {featured && (
+          <span className="absolute left-3 top-3 rounded-full bg-yellow-400 px-3 py-1 text-xs font-bold text-black">
+            ⭐ Featured
+          </span>
+        )}
 
-        <p className="mt-2 text-2xl font-bold text-[#087531]">
+        {condition && (
+          <span className="absolute bottom-3 right-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-700">
+            {condition}
+          </span>
+        )}
+      </div>
+
+      <div className="space-y-2 p-4">
+        <h3 className="line-clamp-2 text-lg font-bold text-slate-900">
+          {title}
+        </h3>
+
+        <p className="text-2xl font-extrabold text-[#087531]">
           ${price.toLocaleString()}
         </p>
 
-        <p className="mt-2 text-slate-600">
+        <p className="text-sm text-slate-600">
           📍 {location}
         </p>
       </div>
