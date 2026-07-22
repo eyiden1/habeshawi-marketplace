@@ -21,6 +21,7 @@ export const sampleJobs: Job[] = [
     contactEmail: "jobs@example.com",
     contactPhone: "(301) 555-0142",
     postedAt: "Posted today",
+    createdAt: "2026-07-22T09:00:00.000Z",
   },
   {
     id: "delivery-driver-washington-dc",
@@ -42,6 +43,7 @@ export const sampleJobs: Job[] = [
     contactEmail: "drivers@example.com",
     contactPhone: "(202) 555-0186",
     postedAt: "Posted 1 day ago",
+    createdAt: "2026-07-21T09:00:00.000Z",
   },
   {
     id: "it-support-rockville",
@@ -63,6 +65,7 @@ export const sampleJobs: Job[] = [
     contactEmail: "careers@example.com",
     applyUrl: "https://example.com/apply",
     postedAt: "Posted 2 days ago",
+    createdAt: "2026-07-20T09:00:00.000Z",
   },
   {
     id: "home-care-aide-takoma-park",
@@ -84,6 +87,7 @@ export const sampleJobs: Job[] = [
     contactEmail: "care@example.com",
     contactPhone: "(240) 555-0139",
     postedAt: "Posted 3 days ago",
+    createdAt: "2026-07-19T09:00:00.000Z",
   },
   {
     id: "grocery-cashier-hyattsville",
@@ -105,6 +109,7 @@ export const sampleJobs: Job[] = [
     contactEmail: "marketjobs@example.com",
     contactPhone: "(301) 555-0191",
     postedAt: "Posted 4 days ago",
+    createdAt: "2026-07-18T09:00:00.000Z",
   },
   {
     id: "office-assistant-alexandria",
@@ -125,6 +130,7 @@ export const sampleJobs: Job[] = [
     contactName: "Office Manager",
     contactEmail: "officejobs@example.com",
     postedAt: "Posted 5 days ago",
+    createdAt: "2026-07-17T09:00:00.000Z",
   },
 ];
 
