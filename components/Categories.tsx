@@ -1,83 +1,89 @@
 import Link from "next/link";
 
-const categories = [
+const sections = [
   {
-    icon: "🛏️",
-    title: "Rooms",
-    amharic: "ክፍል",
-    href: "/housing/rooms",
+    title: "Rentals",
+    amharic: "የሚከራይ ቤቶች",
+    icon: "🏠",
+    description:
+      "Rooms, apartments, houses, basements, commercial spaces and roommates.",
+    href: "/housing",
+    button: "Browse Rentals",
     color: "bg-green-50",
   },
   {
-    icon: "🏢",
-    title: "Apartments",
-    amharic: "አፓርታማ",
-    href: "/housing/apartments",
+    title: "Marketplace",
+    amharic: "ገበያ",
+    icon: "🛍️",
+    description:
+      "Buy and sell cars, phones, furniture, electronics and community services.",
+    href: "/marketplace",
+    button: "Shop Marketplace",
     color: "bg-blue-50",
   },
   {
-    icon: "🏡",
-    title: "Houses",
-    amharic: "ቤት",
-    href: "/housing/houses",
+    title: "Promotions",
+    amharic: "ማስታወቂያ",
+    icon: "📢",
+    description:
+      "Discover restaurants, grocery stores, events, sales and featured businesses.",
+    href: "/businesses",
+    button: "View Promotions",
     color: "bg-yellow-50",
   },
   {
-    icon: "🏘️",
-    title: "Basements",
-    amharic: "ቤዝመንት",
-    href: "/housing",
-    color: "bg-orange-50",
-  },
-  {
-    icon: "👥",
-    title: "Roommates",
-    amharic: "አብሮ የሚኖር",
-    href: "/housing/roommates",
+    title: "Jobs",
+    amharic: "ስራ",
+    icon: "💼",
+    description:
+      "Find your next opportunity or connect with qualified employees.",
+    href: "/jobs",
+    button: "Find Jobs",
     color: "bg-purple-50",
-  },
-  {
-    icon: "🏬",
-    title: "Commercial",
-    amharic: "የንግድ ቦታ",
-    href: "/housing",
-    color: "bg-red-50",
   },
 ];
 
 export default function Categories() {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-14">
-      <div className="mb-10 text-center">
+    <section className="mx-auto max-w-7xl px-6 py-16">
+      <div className="mx-auto mb-12 max-w-3xl text-center">
         <h2 className="text-4xl font-black text-[#064d2b]">
-          Browse Rental Categories
+          Explore Habeshawi Marketplace
         </h2>
 
-        <p className="mt-3 text-xl text-gray-600">
-          የሚከራይ ቤቶችን በአይነት ይመልከቱ
+        <p className="mt-4 text-xl text-gray-600">
+          Buy • Sell • Rent • Find Jobs • Promote Your Business
+        </p>
+
+        <p className="mt-2 font-semibold text-[#087531]">
+          ይግዙ • ይሽጡ • ይከራዩ • ስራ ያግኙ • ንግድዎን ያስተዋውቁ
         </p>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {categories.map((category) => (
+      <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
+        {sections.map((section) => (
           <Link
-            key={category.title}
-            href={category.href}
-            className={`${category.color} group rounded-3xl border border-gray-200 p-8 shadow-sm transition duration-300 hover:-translate-y-2 hover:shadow-xl`}
+            key={section.title}
+            href={section.href}
+            className={`${section.color} group rounded-3xl border border-gray-200 p-8 shadow-sm transition duration-300 hover:-translate-y-2 hover:shadow-xl`}
           >
-            <div className="text-6xl">{category.icon}</div>
+            <div className="text-6xl">{section.icon}</div>
 
             <h3 className="mt-6 text-2xl font-black text-[#064d2b]">
-              {category.title}
+              {section.title}
             </h3>
 
-            <p className="mt-2 text-lg font-semibold text-gray-600">
-              {category.amharic}
+            <p className="mt-2 text-lg font-semibold text-[#087531]">
+              {section.amharic}
+            </p>
+
+            <p className="mt-5 min-h-[90px] text-gray-600 leading-7">
+              {section.description}
             </p>
 
             <div className="mt-6 flex items-center justify-between">
-              <span className="rounded-full bg-white px-4 py-2 text-sm font-bold shadow">
-                View Listings
+              <span className="rounded-full bg-white px-5 py-2 text-sm font-bold shadow">
+                {section.button}
               </span>
 
               <span className="text-2xl transition group-hover:translate-x-2">

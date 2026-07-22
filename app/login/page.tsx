@@ -28,7 +28,7 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/");
+    router.push("/account");
     router.refresh();
   }
 
@@ -109,14 +109,26 @@ export default function LoginPage() {
             {loading ? "Please wait..." : "Login"}
           </button>
 
-          <button
-            type="button"
-            onClick={handleSignUp}
-            disabled={loading}
-            className="w-full rounded-lg border border-[#087531] px-4 py-3 font-semibold text-[#087531] hover:bg-green-50 disabled:opacity-60"
-          >
-            Create Account
-          </button>
+<div className="mt-6 space-y-3 text-center">
+  <p className="text-sm text-slate-600">
+    Don't have an account?{" "}
+    <a
+      href="/signup"
+      className="font-semibold text-[#087531] hover:underline"
+    >
+      Create Account
+    </a>
+  </p>
+
+  <p>
+    <a
+      href="/forgot-password"
+      className="text-sm font-semibold text-[#087531] hover:underline"
+    >
+      Forgot Password?
+    </a>
+  </p>
+</div>
         </form>
       </div>
     </main>

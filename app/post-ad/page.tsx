@@ -1,13 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function PostAdPage() {
+  const router = useRouter();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editLink, setEditLink] = useState("");
   const [createdRentalId, setCreatedRentalId] = useState("");
   const [copied, setCopied] = useState(false);
+  const [checkingUser, setCheckingUser] = useState(true);
+
+  useEffect(() => {
+    async function checkUser() {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
+      if (error || !user) {
+        router.replace("/login");
+        return;
+      }
+
+      setCheckingUser(false);
+    }
+
+    void checkUser();
+  }, [router]);
 
   async function copyEditLink() {
     if (!editLink) return;
@@ -32,6 +54,18 @@ export default function PostAdPage() {
     if (isSubmitting) return;
 
     setIsSubmitting(true);
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      alert("You must be signed in to post a rental.");
+      setIsSubmitting(false);
+      router.replace("/login");
+      return;
+    }
 
     const form = event.currentTarget;
     const formData = new FormData(form);
@@ -72,7 +106,7 @@ export default function PostAdPage() {
         imageFile.name.split(".").pop()?.toLowerCase() ?? "jpg";
 
       const filePath =
-        `rentals/${crypto.randomUUID()}.${extension}`;
+        `rentals/${user.id}/${crypto.randomUUID()}.${extension}`;
 
       const { error: uploadError } = await supabase.storage
         .from("housing-images")
@@ -97,8 +131,6 @@ export default function PostAdPage() {
     }
 
     const imageUrl = imageUrls[0];
-
-    // Create a private token known only to the person posting.
     const editToken = crypto.randomUUID();
 
     const { data: rental, error } = await supabase
@@ -125,8 +157,8 @@ export default function PostAdPage() {
         image_url: imageUrl,
 
         edit_token: editToken,
-status: "draft",
-payment_status: "unpaid",
+        status: "draft",
+        payment_status: "unpaid",
       })
       .select("id")
       .single();
@@ -167,7 +199,6 @@ payment_status: "unpaid",
       `${window.location.origin}/post-ad/edit/${rental.id}` +
       `?token=${editToken}`;
 
-    // Save the link in this browser as a backup.
     localStorage.setItem(
       `rental-edit-link-${rental.id}`,
       privateEditLink
@@ -181,6 +212,16 @@ payment_status: "unpaid",
       top: 0,
       behavior: "smooth",
     });
+  }
+
+  if (checkingUser) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#f7f8f5] px-6">
+        <p className="text-lg font-semibold text-slate-700">
+          Checking your account...
+        </p>
+      </main>
+    );
   }
 
   if (editLink && createdRentalId) {
