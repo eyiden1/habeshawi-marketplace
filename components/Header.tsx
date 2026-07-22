@@ -100,7 +100,7 @@ export default function Header() {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-6">
           <Link href="/" className="flex shrink-0 items-center">
             <Image
-              src="/logo/habeshawi-logo.png"
+              src="/logo/Habeshawi -logo.png"
               alt="Habeshawi Rentals"
               width={520}
               height={170}
@@ -196,31 +196,24 @@ export default function Header() {
 
           {/* Right Side */}
           <div className="flex items-center gap-3">
-            {user ? (
-              <>
-                <Link
-                  href="/admin"
-                  className="hidden rounded-lg border border-[#087531] px-4 py-2 font-bold text-[#087531] transition hover:bg-green-50 sm:inline-flex"
-                >
-                  Admin
-                </Link>
+          {user ? (
+  <>
+    <Link
+      href="/admin"
+      className="hidden rounded-lg border border-[#087531] px-4 py-2 font-bold text-[#087531] transition hover:bg-green-50 sm:inline-flex"
+    >
+      Admin Dashboard
+    </Link>
 
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="rounded-lg border border-red-600 px-4 py-2 font-bold text-red-600 transition hover:bg-red-50"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <Link
-                href="/login"
-                className="rounded-lg border border-[#087531] px-4 py-2 font-bold text-[#087531] transition hover:bg-green-50"
-              >
-                Admin Login
-              </Link>
-            )}
+    <button
+      type="button"
+      onClick={handleLogout}
+      className="rounded-lg border border-red-600 px-4 py-2 font-bold text-red-600 transition hover:bg-red-50"
+    >
+      Logout
+    </button>
+  </>
+) : null}
 
             <Link
               href="/post-ad"
