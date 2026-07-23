@@ -1,25 +1,31 @@
 import Link from "next/link";
 import type { Business } from "@/types/business";
+import Image from "next/image";
 
 type BusinessCardProps = {
   business: Business;
 };
 
 export default function BusinessCard({ business }: BusinessCardProps) {
-  const initials = business.name
-    .split(" ")
-    .slice(0, 2)
-    .map((word) => word.charAt(0))
-    .join("")
-    .toUpperCase();
 
   return (
     <article className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-      <div className="flex h-40 items-center justify-center bg-gradient-to-br from-green-50 via-yellow-50 to-red-50">
-        <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[#064d2b] text-2xl font-black text-white shadow-md">
-          {initials}
-        </div>
-      </div>
+<div className="flex h-40 items-center justify-center bg-gradient-to-br from-green-50 via-yellow-50 to-red-50 p-4">
+<div className="flex h-52 items-center justify-center bg-gradient-to-br from-green-50 via-yellow-50 to-red-50 p-3">
+  <div className="relative h-44 w-44 overflow-hidden rounded-3xl bg-white shadow-lg">
+    <Image
+      src={
+        business.logoImageUrl ||
+        "/business/default-logo.jpg"
+      }
+      alt={`${business.name} logo`}
+      fill
+      sizes="176px"
+      className="object-contain"
+    />
+  </div>
+</div>
+</div>
 
       <div className="p-6">
         <div className="flex items-start justify-between gap-3">

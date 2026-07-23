@@ -26,4 +26,5 @@ export type Business = {
   featured?: boolean;
   openNow?: boolean;
   imageUrl?: string;
+  logoImageUrl?: string;
 };

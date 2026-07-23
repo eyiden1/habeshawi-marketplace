@@ -40,14 +40,26 @@ export default async function FeaturedBusinesses() {
               href={`/businesses/${business.id}`}
               className="overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
             >
-              <div className="relative h-48 bg-slate-100">
-<Image
-  src={business.coverImageUrl || "/business/business.png"}
-  alt={business.name}
-  fill
-  className="object-cover"
-/>
-              </div>
+<div className="relative h-48 bg-slate-100">
+  <Image
+    src={business.coverImageUrl || "/business/business.png"}
+    alt={business.name}
+    fill
+    className="object-cover"
+  />
+
+  <div className="absolute -bottom-6 left-5 h-16 w-16 overflow-hidden rounded-full border-4 border-white bg-white shadow-lg">
+    <Image
+      src={
+        business.logoImageUrl ||
+        "/business/default-logo.png"
+      }
+      alt={`${business.name} logo`}
+      fill
+      className="object-cover"
+    />
+  </div>
+</div>
 
               <div className="p-5">
                 <h3 className="line-clamp-1 text-lg font-semibold">

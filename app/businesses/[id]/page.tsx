@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import BusinessCard from "@/components/businesses/BusinessCard";
+import Image from "next/image";
 import {
   getBusinessById,
   getSimilarBusinesses,
@@ -47,11 +48,20 @@ export default async function BusinessDetailsPage({
         </Link>
 
         <section className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg">
-          <div className="flex min-h-64 items-center justify-center bg-gradient-to-br from-green-100 via-yellow-50 to-red-100 px-6 py-12">
-            <div className="flex h-32 w-32 items-center justify-center rounded-3xl bg-[#064d2b] text-4xl font-black text-white shadow-xl">
-              {initials}
-            </div>
-          </div>
+<div className="flex min-h-64 items-center justify-center bg-gradient-to-br from-green-100 via-yellow-50 to-red-100 px-6 py-12">
+<div className="relative h-40 w-40 overflow-hidden rounded-3xl bg-white p-2 shadow-xl">
+  <Image
+    src={
+      business.logoImageUrl ||
+      "/business/default-logo.jpg"
+    }
+    alt={`${business.name} logo`}
+    fill
+    sizes="160px"
+    className="object-contain p-2"
+  />
+</div>
+</div>
 
           <div className="grid gap-8 p-6 md:p-10 lg:grid-cols-[1.5fr_0.8fr]">
             <div>
