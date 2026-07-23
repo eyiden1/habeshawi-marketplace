@@ -42,7 +42,7 @@ export default async function FeaturedBusinesses() {
             >
 <div className="relative h-48 bg-slate-100">
   <Image
-    src={business.coverImageUrl || "/business/business.png"}
+    src={business.coverImageUrl || "/business/default-business.jpg"}
     alt={business.name}
     fill
     className="object-cover"
@@ -52,7 +52,7 @@ export default async function FeaturedBusinesses() {
     <Image
       src={
         business.logoImageUrl ||
-        "/business/default-logo.png"
+        "/business/default-logo.jpg"
       }
       alt={`${business.name} logo`}
       fill
