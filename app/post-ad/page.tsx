@@ -1,497 +1,167 @@
-"use client";
+import Link from "next/link";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+type PostingOption = {
+  title: string;
+  description: string;
+  details: string;
+  href: string;
+  buttonText: string;
+  icon: string;
+};
+
+const postingOptions: PostingOption[] = [
+  {
+    title: "Post a Rental",
+    description:
+      "List a room, apartment, house, roommate space, or commercial property.",
+    details: "Rooms • Apartments • Houses • Commercial Properties • Roommates",
+    href: "/post-ad/rental",
+    buttonText: "Post Rental",
+    icon: "🏠",
+  },
+  {
+    title: "Sell an Item",
+    description:
+      "Post products such as cars, phones, electronics, furniture, clothing, and more.",
+    details: "Vehicles • Electronics • Furniture • Clothing • Equipment",
+    href: "/marketplace/post",
+    buttonText: "Post Marketplace Item",
+    icon: "🛍️",
+  },
+  {
+    title: "Post a Job",
+    description:
+      "Advertise an available position and connect with job seekers in the community.",
+    details: "Full-Time • Part-Time • Contract • Temporary",
+    href: "/jobs/post",
+    buttonText: "Post Job",
+    icon: "💼",
+  },
+  {
+    title: "Add a Business",
+    description:
+      "Create a profile for your restaurant, store, professional service, or organization.",
+    details: "Restaurants • Stores • Professionals • Community Services",
+    href: "/businesses/post",
+    buttonText: "Add Business",
+    icon: "🏢",
+  },
+  {
+    title: "Create a Promotion",
+    description:
+      "Promote your business, event, special offer, product, or service.",
+    details: "Business Offers • Events • Specials • Announcements",
+    href: "/promotion/post",
+    buttonText: "Create Promotion",
+    icon: "📢",
+  },
+];
 
 export default function PostAdPage() {
-  const router = useRouter();
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [editLink, setEditLink] = useState("");
-  const [createdRentalId, setCreatedRentalId] = useState("");
-  const [copied, setCopied] = useState(false);
-  const [checkingUser, setCheckingUser] = useState(true);
-
-  useEffect(() => {
-    async function checkUser() {
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
-
-      if (error || !user) {
-        router.replace("/login");
-        return;
-      }
-
-      setCheckingUser(false);
-    }
-
-    void checkUser();
-  }, [router]);
-
-  async function copyEditLink() {
-    if (!editLink) return;
-
-    try {
-      await navigator.clipboard.writeText(editLink);
-      setCopied(true);
-
-      setTimeout(() => {
-        setCopied(false);
-      }, 2000);
-    } catch {
-      alert("Unable to copy the link. Please copy it manually.");
-    }
-  }
-
-  async function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
-  ) {
-    event.preventDefault();
-
-    if (isSubmitting) return;
-
-    setIsSubmitting(true);
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      alert("You must be signed in to post a rental.");
-      setIsSubmitting(false);
-      router.replace("/login");
-      return;
-    }
-
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-
-    const bedroomsValue = formData.get("bedrooms");
-    const bathroomsValue = formData.get("bathrooms");
-    const availableDateValue = formData.get("available_date");
-
-    const imageFiles = formData
-      .getAll("photos")
-      .filter(
-        (file): file is File =>
-          file instanceof File && file.size > 0
-      );
-
-    if (imageFiles.length === 0) {
-      alert("Please upload at least one property photo.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (imageFiles.length > 5) {
-      alert("You can upload a maximum of 5 photos.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    const imageUrls: string[] = [];
-
-    for (const imageFile of imageFiles) {
-      if (imageFile.size > 5 * 1024 * 1024) {
-        alert(`${imageFile.name} must be 5 MB or smaller.`);
-        setIsSubmitting(false);
-        return;
-      }
-
-      const extension =
-        imageFile.name.split(".").pop()?.toLowerCase() ?? "jpg";
-
-      const filePath =
-        `rentals/${user.id}/${crypto.randomUUID()}.${extension}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("housing-images")
-        .upload(filePath, imageFile, {
-          cacheControl: "3600",
-          upsert: false,
-        });
-
-      if (uploadError) {
-        alert(
-          `Unable to upload ${imageFile.name}: ${uploadError.message}`
-        );
-        setIsSubmitting(false);
-        return;
-      }
-
-      const { data: publicUrlData } = supabase.storage
-        .from("housing-images")
-        .getPublicUrl(filePath);
-
-      imageUrls.push(publicUrlData.publicUrl);
-    }
-
-    const imageUrl = imageUrls[0];
-    const editToken = crypto.randomUUID();
-
-    const { data: rental, error } = await supabase
-      .from("rentals")
-      .insert({
-        title: formData.get("title"),
-        property_type: formData.get("property_type"),
-        price: Number(formData.get("price")),
-        location: formData.get("location"),
-
-        bedrooms: bedroomsValue
-          ? Number(bedroomsValue)
-          : null,
-
-        bathrooms: bathroomsValue
-          ? Number(bathroomsValue)
-          : null,
-
-        available_date: availableDateValue || null,
-        description: formData.get("description"),
-        phone: formData.get("phone"),
-        whatsapp: formData.get("whatsapp") || null,
-        email: formData.get("email") || null,
-        image_url: imageUrl,
-
-        edit_token: editToken,
-        status: "draft",
-        payment_status: "unpaid",
-      })
-      .select("id")
-      .single();
-
-    if (error) {
-      alert(`Unable to submit rental: ${error.message}`);
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!rental) {
-      alert(
-        "Rental was saved, but its ID could not be retrieved."
-      );
-      setIsSubmitting(false);
-      return;
-    }
-
-    const rentalImages = imageUrls.map((url, index) => ({
-      rental_id: rental.id,
-      image_url: url,
-      display_order: index + 1,
-    }));
-
-    const { error: imagesError } = await supabase
-      .from("rental_images")
-      .insert(rentalImages);
-
-    if (imagesError) {
-      alert(
-        `Rental saved, but the photo records could not be saved: ${imagesError.message}`
-      );
-      setIsSubmitting(false);
-      return;
-    }
-
-    const privateEditLink =
-      `${window.location.origin}/post-ad/edit/${rental.id}` +
-      `?token=${editToken}`;
-
-    localStorage.setItem(
-      `rental-edit-link-${rental.id}`,
-      privateEditLink
-    );
-
-    setCreatedRentalId(rental.id);
-    setEditLink(privateEditLink);
-    setIsSubmitting(false);
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }
-
-  if (checkingUser) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f7f8f5] px-6">
-        <p className="text-lg font-semibold text-slate-700">
-          Checking your account...
-        </p>
-      </main>
-    );
-  }
-
-  if (editLink && createdRentalId) {
-    return (
-      <main className="min-h-screen bg-[#f7f8f5] px-6 py-12">
-        <div className="mx-auto max-w-3xl rounded-2xl bg-white p-8 shadow">
-          <div className="rounded-2xl border border-green-200 bg-green-50 p-6">
-            <h1 className="text-3xl font-bold text-[#064d2b]">
-              Listing Created
-            </h1>
-
-            <p className="mt-3 text-slate-700">
-              Your listing was saved. It will not appear publicly
-              until payment and admin approval are completed.
-            </p>
-          </div>
-
-          <div className="mt-8 rounded-2xl border border-amber-300 bg-amber-50 p-6">
-            <h2 className="text-xl font-bold text-amber-900">
-              Save Your Private Edit Link
-            </h2>
-
-            <p className="mt-2 text-sm text-amber-800">
-              Anyone who has this link can edit the listing. Do not
-              share it publicly.
-            </p>
-
-            <div className="mt-4 break-all rounded-lg border bg-white p-4 text-sm">
-              {editLink}
-            </div>
-
-            <button
-              type="button"
-              onClick={copyEditLink}
-              className="mt-4 rounded-lg border border-[#087531] px-5 py-3 font-semibold text-[#087531] hover:bg-green-50"
-            >
-              {copied ? "Link Copied" : "Copy Private Edit Link"}
-            </button>
-          </div>
-
-          <div className="mt-8">
-            <a
-              href={`/pricing?rentalId=${createdRentalId}`}
-              className="block rounded-lg bg-[#087531] px-6 py-4 text-center text-lg font-semibold text-white hover:bg-[#064d2b]"
-            >
-              Continue to Payment
-            </a>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
   return (
-    <main className="min-h-screen bg-[#f7f8f5] px-6 py-12">
-      <div className="mx-auto max-w-3xl rounded-2xl bg-white p-8 shadow">
-        <h1 className="text-4xl font-bold text-[#064d2b]">
-          Post a Rental
-        </h1>
+    <main className="min-h-screen bg-[#f7f8f5] px-4 py-10 sm:px-6 sm:py-14">
+      <section className="mx-auto max-w-7xl">
+        <div className="rounded-3xl border border-green-100 bg-white px-6 py-10 text-center shadow-sm sm:px-10">
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#087531]">
+            Habeshawi Marketplace
+          </p>
 
-        <p className="mt-3 text-slate-600">
-          Add your apartment, house, room, or roommate listing.
-        </p>
+          <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-[#064d2b] sm:text-5xl">
+            Post an Ad
+          </h1>
 
-        <form
-          onSubmit={handleSubmit}
-          className="mt-8 grid gap-5"
-        >
-          <input
-            type="text"
-            name="title"
-            placeholder="Example: 2-bedroom apartment in Silver Spring"
-            required
-            className="w-full rounded-lg border border-slate-300 px-4 py-3"
-          />
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
+            Choose the type of listing you would like to create. Each
+            option has a form designed specifically for that listing.
+          </p>
+        </div>
 
-          <select
-            name="property_type"
-            required
-            defaultValue=""
-            className="rounded-lg border border-slate-300 px-4 py-3"
-          >
-            <option value="" disabled>
-              Property type
-            </option>
-
-            <option value="apartment">Apartment</option>
-            <option value="house">House</option>
-            <option value="room">Room</option>
-            <option value="roommate">Roommate</option>
-          </select>
-
-          <input
-            type="number"
-            name="price"
-            min="0"
-            step="0.01"
-            placeholder="Monthly rent"
-            required
-            className="rounded-lg border border-slate-300 px-4 py-3"
-          />
-
-          <input
-            type="text"
-            name="location"
-            placeholder="Location"
-            required
-            className="rounded-lg border border-slate-300 px-4 py-3"
-          />
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            <input
-              type="number"
-              name="bedrooms"
-              min="0"
-              placeholder="Bedrooms"
-              className="rounded-lg border border-slate-300 px-4 py-3"
-            />
-
-            <input
-              type="number"
-              name="bathrooms"
-              min="0"
-              step="0.5"
-              placeholder="Bathrooms"
-              className="rounded-lg border border-slate-300 px-4 py-3"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="available_date"
-              className="mb-2 block font-semibold text-slate-700"
+        <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {postingOptions.map((option) => (
+            <article
+              key={option.title}
+              className="group flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-green-300 hover:shadow-lg"
             >
-              Available Date
-            </label>
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-green-50 text-4xl">
+                <span aria-hidden="true">{option.icon}</span>
+              </div>
 
-            <input
-              id="available_date"
-              type="date"
-              name="available_date"
-              className="w-full rounded-lg border border-slate-300 px-4 py-3"
-            />
-          </div>
+              <h2 className="mt-6 text-2xl font-bold text-[#064d2b]">
+                {option.title}
+              </h2>
 
-          <input
-            type="tel"
-            name="phone"
-            placeholder="Phone Number"
-            required
-            className="rounded-lg border border-slate-300 px-4 py-3"
-          />
+              <p className="mt-3 leading-7 text-slate-600">
+                {option.description}
+              </p>
 
-          <input
-            type="tel"
-            name="whatsapp"
-            placeholder="WhatsApp"
-            className="rounded-lg border border-slate-300 px-4 py-3"
-          />
+              <p className="mt-4 text-sm font-semibold leading-6 text-slate-500">
+                {option.details}
+              </p>
 
-          <input
-            type="email"
-            name="email"
-            placeholder="Email Address"
-            className="rounded-lg border border-slate-300 px-4 py-3"
-          />
+              <div className="mt-auto pt-7">
+                <Link
+                  href={option.href}
+                  className="inline-flex w-full items-center justify-center rounded-xl bg-[#087531] px-5 py-3 font-bold text-white transition hover:bg-[#064d2b] focus:outline-none focus:ring-2 focus:ring-[#087531] focus:ring-offset-2"
+                >
+                  {option.buttonText}
+                  <span className="ml-2" aria-hidden="true">
+                    →
+                  </span>
+                </Link>
+              </div>
+            </article>
+          ))}
+        </div>
 
-          <div>
-            <h2 className="mb-3 text-lg font-semibold text-[#064d2b]">
-              Amenities
-            </h2>
+        <section className="mt-10 rounded-3xl border border-amber-200 bg-amber-50 p-7 sm:p-9">
+          <h2 className="text-2xl font-bold text-amber-950">
+            Need help choosing?
+          </h2>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  name="amenities"
-                  value="parking"
-                />
-                Parking
-              </label>
+          <div className="mt-5 grid gap-5 text-sm leading-6 text-amber-950 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <h3 className="font-bold">Rentals</h3>
+              <p className="mt-1">
+Use this for rooms, apartments, houses, roommates, commercial
+properties, office space, retail space, restaurants, and other
+commercial listings.
+              </p>
+            </div>
 
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  name="amenities"
-                  value="utilities-included"
-                />
-                Utilities Included
-              </label>
+            <div>
+              <h3 className="font-bold">Marketplace</h3>
+              <p className="mt-1">
+                Use this for cars, phones, electronics, furniture,
+                clothing, equipment, and other items.
+              </p>
+            </div>
 
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  name="amenities"
-                  value="wifi-included"
-                />
-                Wi-Fi Included
-              </label>
+            <div>
+              <h3 className="font-bold">Jobs</h3>
+              <p className="mt-1">
+                Use this when an employer or business wants to advertise
+                an available position.
+              </p>
+            </div>
 
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  name="amenities"
-                  value="laundry"
-                />
-                Laundry
-              </label>
+            <div>
+              <h3 className="font-bold">Businesses</h3>
+              <p className="mt-1">
+                Use this to create a directory profile for a restaurant,
+                store, or professional service.
+              </p>
+            </div>
 
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  name="amenities"
-                  value="air-conditioning"
-                />
-                Air Conditioning
-              </label>
-
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  name="amenities"
-                  value="pets-allowed"
-                />
-                Pets Allowed
-              </label>
+            <div>
+              <h3 className="font-bold">Promotions</h3>
+              <p className="mt-1">
+                Use this to advertise a special offer, event, service, or
+                business announcement.
+              </p>
             </div>
           </div>
-
-          <textarea
-            name="description"
-            placeholder="Description"
-            rows={5}
-            className="rounded-lg border border-slate-300 px-4 py-3"
-          />
-
-          <div>
-            <label
-              htmlFor="photos"
-              className="mb-2 block font-semibold text-slate-700"
-            >
-              Property Photos
-            </label>
-
-            <input
-              id="photos"
-              type="file"
-              name="photos"
-              multiple
-              required
-              accept="image/*"
-              className="w-full rounded-lg border border-slate-300 px-4 py-3"
-            />
-
-            <p className="mt-2 text-sm text-slate-500">
-              Upload 1 to 5 photos. Maximum 5 MB per photo.
-            </p>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="rounded-lg bg-[#087531] px-6 py-3 font-semibold text-white hover:bg-[#064d2b] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isSubmitting
-              ? "Submitting Rental..."
-              : "Submit Rental"}
-          </button>
-        </form>
-      </div>
+        </section>
+      </section>
     </main>
   );
 }

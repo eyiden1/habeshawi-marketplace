@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import BusinessImageUpload from "@/components/businesses/BusinessImageUpload";
 
 type BusinessForm = {
   name: string;
@@ -32,6 +31,36 @@ type BusinessForm = {
   sunday_hours: string;
   image_url: string;
   logo_url: string;
+};
+
+type BusinessRow = {
+  id: string;
+  user_id: string | null;
+  name: string;
+  category: string;
+  description: string;
+  address: string;
+  city: string;
+  state: string;
+  zip_code: string | null;
+  phone: string | null;
+  email: string | null;
+  website: string | null;
+  facebook_url: string | null;
+  instagram_url: string | null;
+  telegram_url: string | null;
+  whatsapp: string | null;
+  specialties: string[] | null;
+  monday_hours: string | null;
+  tuesday_hours: string | null;
+  wednesday_hours: string | null;
+  thursday_hours: string | null;
+  friday_hours: string | null;
+  saturday_hours: string | null;
+  sunday_hours: string | null;
+  image_url: string | null;
+  logo_url: string | null;
+  status: string | null;
 };
 
 const initialForm: BusinessForm = {
@@ -94,6 +123,11 @@ const states = [
   { value: "Other", label: "Other" },
 ];
 
+function optionalText(value: string) {
+  const trimmedValue = value.trim();
+  return trimmedValue || null;
+}
+
 function normalizeUrl(value: string) {
   const trimmedValue = value.trim();
 
@@ -102,6 +136,7 @@ function normalizeUrl(value: string) {
   }
 
   if (
+    trimmedValue.startsWith("/") ||
     trimmedValue.startsWith("http://") ||
     trimmedValue.startsWith("https://")
   ) {
@@ -111,67 +146,157 @@ function normalizeUrl(value: string) {
   return `https://${trimmedValue}`;
 }
 
-function optionalText(value: string) {
-  const trimmedValue = value.trim();
-  return trimmedValue || null;
+function convertBusinessToForm(business: BusinessRow): BusinessForm {
+  return {
+    name: business.name ?? "",
+    category: business.category ?? "",
+    description: business.description ?? "",
+    address: business.address ?? "",
+    city: business.city ?? "",
+    state: business.state ?? "DC",
+    zip_code: business.zip_code ?? "",
+    phone: business.phone ?? "",
+    email: business.email ?? "",
+    website: business.website ?? "",
+    facebook_url: business.facebook_url ?? "",
+    instagram_url: business.instagram_url ?? "",
+    telegram_url: business.telegram_url ?? "",
+    whatsapp: business.whatsapp ?? "",
+    specialties: business.specialties?.join(", ") ?? "",
+    monday_hours: business.monday_hours ?? "",
+    tuesday_hours: business.tuesday_hours ?? "",
+    wednesday_hours: business.wednesday_hours ?? "",
+    thursday_hours: business.thursday_hours ?? "",
+    friday_hours: business.friday_hours ?? "",
+    saturday_hours: business.saturday_hours ?? "",
+    sunday_hours: business.sunday_hours ?? "",
+    image_url: business.image_url ?? "",
+    logo_url: business.logo_url ?? "",
+  };
 }
 
-export default function PostBusinessPage() {
+export default function EditBusinessPage() {
+  const params = useParams<{ id: string }>();
   const router = useRouter();
 
+  const businessId =
+    typeof params.id === "string"
+      ? params.id
+      : Array.isArray(params.id)
+        ? params.id[0]
+        : "";
+
   const [user, setUser] = useState<User | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
   const [form, setForm] = useState<BusinessForm>(initialForm);
-  const [submitting, setSubmitting] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState<string>("pending");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [notFound, setNotFound] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     let isMounted = true;
 
-    async function loadUser() {
+    async function loadBusiness() {
+      setLoading(true);
+      setErrorMessage("");
+
+      if (!businessId) {
+        setNotFound(true);
+        setLoading(false);
+        return;
+      }
+
       const {
         data: { user: currentUser },
+        error: userError,
       } = await supabase.auth.getUser();
 
       if (!isMounted) {
         return;
       }
 
-      setUser(currentUser);
-
-      if (currentUser?.email) {
-        setForm((currentForm) => ({
-          ...currentForm,
-          email: currentForm.email || currentUser.email || "",
-        }));
+      if (userError) {
+        setErrorMessage(userError.message);
+        setLoading(false);
+        return;
       }
 
-      setAuthLoading(false);
+      setUser(currentUser);
+
+      if (!currentUser) {
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("businesses")
+        .select(
+          `
+            id,
+            user_id,
+            name,
+            category,
+            description,
+            address,
+            city,
+            state,
+            zip_code,
+            phone,
+            email,
+            website,
+            facebook_url,
+            instagram_url,
+            telegram_url,
+            whatsapp,
+            specialties,
+            monday_hours,
+            tuesday_hours,
+            wednesday_hours,
+            thursday_hours,
+            friday_hours,
+            saturday_hours,
+            sunday_hours,
+            image_url,
+            logo_url,
+            status
+          `,
+        )
+        .eq("id", businessId)
+        .eq("user_id", currentUser.id)
+        .maybeSingle();
+
+      if (!isMounted) {
+        return;
+      }
+
+      if (error) {
+        console.error("Unable to load business:", error);
+        setErrorMessage(error.message);
+        setLoading(false);
+        return;
+      }
+
+      if (!data) {
+        setNotFound(true);
+        setLoading(false);
+        return;
+      }
+
+      const business = data as BusinessRow;
+
+      setForm(convertBusinessToForm(business));
+      setCurrentStatus(business.status ?? "pending");
+      setLoading(false);
     }
 
-    loadUser();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-
-        if (session?.user?.email) {
-          setForm((currentForm) => ({
-            ...currentForm,
-            email: currentForm.email || session.user.email || "",
-          }));
-        }
-
-        setAuthLoading(false);
-      },
-    );
+    loadBusiness();
 
     return () => {
       isMounted = false;
-      authListener.subscription.unsubscribe();
     };
-  }, []);
+  }, [businessId]);
 
   function updateField<K extends keyof BusinessForm>(
     field: K,
@@ -190,7 +315,7 @@ export default function PostBusinessPage() {
     setSuccessMessage("");
 
     if (!user) {
-      setErrorMessage("You must sign in before adding a business.");
+      setErrorMessage("You must be signed in to edit this business.");
       return;
     }
 
@@ -211,75 +336,72 @@ export default function PostBusinessPage() {
       .map((specialty) => specialty.trim())
       .filter(Boolean);
 
-    setSubmitting(true);
+    setSaving(true);
 
-    const { error } = await supabase.from("businesses").insert({
-      name: form.name.trim(),
-      category: form.category.trim(),
-      description: form.description.trim(),
-      address: form.address.trim(),
-      city: form.city.trim(),
-      state: form.state.trim(),
-      zip_code: optionalText(form.zip_code),
-      phone: optionalText(form.phone),
-      email: optionalText(form.email),
-      website: normalizeUrl(form.website),
-      facebook_url: normalizeUrl(form.facebook_url),
-      instagram_url: normalizeUrl(form.instagram_url),
-      telegram_url: normalizeUrl(form.telegram_url),
-      whatsapp: optionalText(form.whatsapp),
-      specialties,
-      monday_hours: optionalText(form.monday_hours),
-      tuesday_hours: optionalText(form.tuesday_hours),
-      wednesday_hours: optionalText(form.wednesday_hours),
-      thursday_hours: optionalText(form.thursday_hours),
-      friday_hours: optionalText(form.friday_hours),
-      saturday_hours: optionalText(form.saturday_hours),
-      sunday_hours: optionalText(form.sunday_hours),
-      image_url: normalizeUrl(form.image_url),
-      logo_url: normalizeUrl(form.logo_url),
-      featured: false,
-      status: "pending",
-      rating: null,
-      review_count: 0,
-      user_id: user.id,
-    });
+    const { error } = await supabase
+      .from("businesses")
+      .update({
+        name: form.name.trim(),
+        category: form.category.trim(),
+        description: form.description.trim(),
+        address: form.address.trim(),
+        city: form.city.trim(),
+        state: form.state.trim(),
+        zip_code: optionalText(form.zip_code),
+        phone: optionalText(form.phone),
+        email: optionalText(form.email),
+        website: normalizeUrl(form.website),
+        facebook_url: normalizeUrl(form.facebook_url),
+        instagram_url: normalizeUrl(form.instagram_url),
+        telegram_url: normalizeUrl(form.telegram_url),
+        whatsapp: optionalText(form.whatsapp),
+        specialties,
+        monday_hours: optionalText(form.monday_hours),
+        tuesday_hours: optionalText(form.tuesday_hours),
+        wednesday_hours: optionalText(form.wednesday_hours),
+        thursday_hours: optionalText(form.thursday_hours),
+        friday_hours: optionalText(form.friday_hours),
+        saturday_hours: optionalText(form.saturday_hours),
+        sunday_hours: optionalText(form.sunday_hours),
+        image_url: normalizeUrl(form.image_url),
+        logo_url: normalizeUrl(form.logo_url),
+        status: "pending",
+        featured: false,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", businessId)
+      .eq("user_id", user.id);
 
     if (error) {
-      console.error("Business submission error:", error);
+      console.error("Unable to update business:", error);
       setErrorMessage(error.message);
-      setSubmitting(false);
+      setSaving(false);
       return;
     }
 
+    setCurrentStatus("pending");
     setSuccessMessage(
-      "Your business was submitted successfully and is waiting for administrator approval.",
+      "Your business was updated successfully and returned to pending review.",
     );
-
-    setForm({
-      ...initialForm,
-      email: user.email ?? "",
-    });
-
-    setSubmitting(false);
+    setSaving(false);
 
     window.setTimeout(() => {
-      router.push("/businesses");
+      router.push("/businesses/my-businesses");
       router.refresh();
-    }, 2200);
+    }, 1800);
   }
 
-  if (authLoading) {
+  if (loading) {
     return (
       <main className="min-h-screen bg-[#f7f8f5] px-4 py-12 sm:px-6">
-        <div className="mx-auto max-w-4xl">
-          <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm">
-            <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#087531]" />
+        <div className="mx-auto max-w-5xl">
+          <section className="rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-sm">
+            <div className="mx-auto h-11 w-11 animate-spin rounded-full border-4 border-slate-200 border-t-[#087531]" />
 
             <p className="mt-5 font-bold text-slate-700">
-              Checking your account...
+              Loading business information...
             </p>
-          </div>
+          </section>
         </div>
       </main>
     );
@@ -289,39 +411,51 @@ export default function PostBusinessPage() {
     return (
       <main className="min-h-screen bg-[#f7f8f5] px-4 py-12 sm:px-6">
         <div className="mx-auto max-w-3xl">
-          <section className="rounded-3xl border border-amber-200 bg-white p-8 text-center shadow-sm sm:p-12">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-amber-100 text-4xl">
-              🔒
-            </div>
+          <section className="rounded-3xl border border-amber-200 bg-white p-10 text-center shadow-sm">
+            <div className="text-5xl">🔒</div>
 
-            <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-[#087531]">
-              Account required
-            </p>
-
-            <h1 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
-              Sign in to add your business
+            <h1 className="mt-5 text-3xl font-black text-slate-950">
+              Sign in to edit your business
             </h1>
 
-            <p className="mx-auto mt-4 max-w-xl leading-7 text-slate-600">
-              Business submissions are connected to your account so you can
-              manage them and follow their approval status.
+            <p className="mx-auto mt-3 max-w-xl leading-7 text-slate-600">
+              Only the account that submitted this business can edit it.
             </p>
 
-            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <Link
-                href="/signin?redirect=/businesses/post"
-                className="rounded-xl bg-[#087531] px-7 py-3 font-black text-white transition hover:bg-[#064d2b]"
-              >
-                Sign In
-              </Link>
+            <Link
+              href={`/signin?redirect=/businesses/edit/${businessId}`}
+              className="mt-7 inline-flex rounded-xl bg-[#087531] px-7 py-3 font-black text-white transition hover:bg-[#064d2b]"
+            >
+              Sign In
+            </Link>
+          </section>
+        </div>
+      </main>
+    );
+  }
 
-              <Link
-                href="/signup"
-                className="rounded-xl border border-[#087531] px-7 py-3 font-black text-[#087531] transition hover:bg-green-50"
-              >
-                Create Account
-              </Link>
-            </div>
+  if (notFound) {
+    return (
+      <main className="min-h-screen bg-[#f7f8f5] px-4 py-12 sm:px-6">
+        <div className="mx-auto max-w-3xl">
+          <section className="rounded-3xl border border-red-200 bg-white p-10 text-center shadow-sm">
+            <div className="text-5xl">🏢</div>
+
+            <h1 className="mt-5 text-3xl font-black text-slate-950">
+              Business not found
+            </h1>
+
+            <p className="mx-auto mt-3 max-w-xl leading-7 text-slate-600">
+              This business does not exist, or it does not belong to your
+              account.
+            </p>
+
+            <Link
+              href="/businesses/my-businesses"
+              className="mt-7 inline-flex rounded-xl bg-[#087531] px-7 py-3 font-black text-white transition hover:bg-[#064d2b]"
+            >
+              Return to My Businesses
+            </Link>
           </section>
         </div>
       </main>
@@ -332,43 +466,40 @@ export default function PostBusinessPage() {
     <main className="min-h-screen bg-[#f7f8f5] px-4 py-10 sm:px-6 sm:py-14">
       <div className="mx-auto max-w-5xl">
         <Link
-          href="/post-ad"
-          className="inline-flex items-center gap-2 font-bold text-[#064d2b] hover:underline"
+          href="/businesses/my-businesses"
+          className="inline-flex font-bold text-[#064d2b] hover:underline"
         >
-          ← Back to Post an Ad
+          ← Back to My Businesses
         </Link>
 
-        <section className="mt-6 overflow-hidden rounded-3xl bg-[#064d2b] px-6 py-10 text-white shadow-lg sm:px-10">
+        <section className="mt-6 rounded-3xl bg-[#064d2b] px-6 py-10 text-white shadow-lg sm:px-10">
           <p className="text-sm font-black uppercase tracking-[0.18em] text-yellow-300">
-            Habeshawi Business Directory
+            Business Owner Dashboard
           </p>
 
           <h1 className="mt-3 text-4xl font-black sm:text-5xl">
-            Add Your Business
+            Edit Business
           </h1>
 
           <p className="mt-4 max-w-3xl text-lg leading-8 text-green-50">
-            Create a business profile to help community members discover your
-            restaurant, store, professional service, organization, or local
-            business.
+            Update your business information, contact details, operating
+            hours, specialties, and images.
           </p>
 
-          <div className="mt-6 rounded-2xl border border-white/20 bg-white/10 p-4 text-sm leading-6 text-green-50">
-            Your submission will be marked as pending. It will appear in the
-            public directory after administrator approval.
+          <div className="mt-6 rounded-2xl border border-white/20 bg-white/10 p-4 text-sm leading-6">
+            Current status:{" "}
+            <span className="font-black capitalize">{currentStatus}</span>.
+            Saving changes will return the business to pending review.
           </div>
         </section>
 
-        <form
-          onSubmit={handleSubmit}
-          className="mt-8 space-y-8"
-        >
+        <form onSubmit={handleSubmit} className="mt-8 space-y-8">
           {errorMessage ? (
             <div
               role="alert"
               className="rounded-2xl border border-red-200 bg-red-50 p-5 text-red-900"
             >
-              <p className="font-black">Unable to submit business</p>
+              <p className="font-black">Unable to save changes</p>
               <p className="mt-1">{errorMessage}</p>
             </div>
           ) : null}
@@ -378,14 +509,14 @@ export default function PostBusinessPage() {
               role="status"
               className="rounded-2xl border border-green-200 bg-green-50 p-5 text-green-900"
             >
-              <p className="font-black">Business submitted</p>
+              <p className="font-black">Business updated</p>
               <p className="mt-1">{successMessage}</p>
             </div>
           ) : null}
 
           <FormSection
             title="Business Information"
-            description="Tell visitors the name, type, and purpose of your business."
+            description="Update the main information customers see."
           >
             <div className="grid gap-5 md:grid-cols-2">
               <FormField
@@ -401,15 +532,11 @@ export default function PostBusinessPage() {
                   }
                   required
                   maxLength={150}
-                  placeholder="Example: Gedam Sefer Ethiopian Cuisine Café"
                   className={inputClasses}
                 />
               </FormField>
 
-              <FormField
-                label="Business category"
-                required
-              >
+              <FormField label="Business category" required>
                 <select
                   value={form.category}
                   onChange={(event) =>
@@ -421,10 +548,7 @@ export default function PostBusinessPage() {
                   <option value="">Select a category</option>
 
                   {categories.map((category) => (
-                    <option
-                      key={category}
-                      value={category}
-                    >
+                    <option key={category} value={category}>
                       {category}
                     </option>
                   ))}
@@ -444,7 +568,6 @@ export default function PostBusinessPage() {
                 label="Business description"
                 required
                 className="md:col-span-2"
-                hint="Describe what your business offers and what makes it special."
               >
                 <textarea
                   value={form.description}
@@ -454,7 +577,6 @@ export default function PostBusinessPage() {
                   required
                   rows={7}
                   maxLength={3000}
-                  placeholder="Tell customers about your business, products, services, experience, and community connection."
                   className={inputClasses}
                 />
               </FormField>
@@ -462,7 +584,7 @@ export default function PostBusinessPage() {
               <FormField
                 label="Services and specialties"
                 className="md:col-span-2"
-                hint="Separate each specialty with a comma."
+                hint="Separate each item with a comma."
               >
                 <input
                   type="text"
@@ -470,7 +592,6 @@ export default function PostBusinessPage() {
                   onChange={(event) =>
                     updateField("specialties", event.target.value)
                   }
-                  placeholder="Ethiopian food, catering, coffee, vegetarian options"
                   className={inputClasses}
                 />
               </FormField>
@@ -479,7 +600,7 @@ export default function PostBusinessPage() {
 
           <FormSection
             title="Business Location"
-            description="Enter the physical address customers can visit."
+            description="Update the physical business address."
           >
             <div className="grid gap-5 md:grid-cols-2">
               <FormField
@@ -494,15 +615,11 @@ export default function PostBusinessPage() {
                     updateField("address", event.target.value)
                   }
                   required
-                  placeholder="5411 Georgia Avenue NW"
                   className={inputClasses}
                 />
               </FormField>
 
-              <FormField
-                label="City"
-                required
-              >
+              <FormField label="City" required>
                 <input
                   type="text"
                   value={form.city}
@@ -510,15 +627,11 @@ export default function PostBusinessPage() {
                     updateField("city", event.target.value)
                   }
                   required
-                  placeholder="Washington"
                   className={inputClasses}
                 />
               </FormField>
 
-              <FormField
-                label="State"
-                required
-              >
+              <FormField label="State" required>
                 <select
                   value={form.state}
                   onChange={(event) =>
@@ -528,10 +641,7 @@ export default function PostBusinessPage() {
                   className={inputClasses}
                 >
                   {states.map((state) => (
-                    <option
-                      key={state.value}
-                      value={state.value}
-                    >
+                    <option key={state.value} value={state.value}>
                       {state.label}
                     </option>
                   ))}
@@ -545,9 +655,7 @@ export default function PostBusinessPage() {
                   onChange={(event) =>
                     updateField("zip_code", event.target.value)
                   }
-                  inputMode="numeric"
                   maxLength={10}
-                  placeholder="20011"
                   className={inputClasses}
                 />
               </FormField>
@@ -556,7 +664,7 @@ export default function PostBusinessPage() {
 
           <FormSection
             title="Contact Information"
-            description="Give visitors reliable ways to contact your business."
+            description="Update the ways customers contact your business."
           >
             <div className="grid gap-5 md:grid-cols-2">
               <FormField label="Business phone">
@@ -566,7 +674,6 @@ export default function PostBusinessPage() {
                   onChange={(event) =>
                     updateField("phone", event.target.value)
                   }
-                  placeholder="(202) 555-0123"
                   className={inputClasses}
                 />
               </FormField>
@@ -578,22 +685,17 @@ export default function PostBusinessPage() {
                   onChange={(event) =>
                     updateField("email", event.target.value)
                   }
-                  placeholder="contact@example.com"
                   className={inputClasses}
                 />
               </FormField>
 
-              <FormField
-                label="Website"
-                className="md:col-span-2"
-              >
+              <FormField label="Website" className="md:col-span-2">
                 <input
                   type="text"
                   value={form.website}
                   onChange={(event) =>
                     updateField("website", event.target.value)
                   }
-                  placeholder="https://www.example.com"
                   className={inputClasses}
                 />
               </FormField>
@@ -605,7 +707,6 @@ export default function PostBusinessPage() {
                   onChange={(event) =>
                     updateField("facebook_url", event.target.value)
                   }
-                  placeholder="https://facebook.com/yourbusiness"
                   className={inputClasses}
                 />
               </FormField>
@@ -617,7 +718,6 @@ export default function PostBusinessPage() {
                   onChange={(event) =>
                     updateField("instagram_url", event.target.value)
                   }
-                  placeholder="https://instagram.com/yourbusiness"
                   className={inputClasses}
                 />
               </FormField>
@@ -629,7 +729,6 @@ export default function PostBusinessPage() {
                   onChange={(event) =>
                     updateField("telegram_url", event.target.value)
                   }
-                  placeholder="https://t.me/yourbusiness"
                   className={inputClasses}
                 />
               </FormField>
@@ -641,7 +740,6 @@ export default function PostBusinessPage() {
                   onChange={(event) =>
                     updateField("whatsapp", event.target.value)
                   }
-                  placeholder="+1 202 555 0123"
                   className={inputClasses}
                 />
               </FormField>
@@ -650,7 +748,7 @@ export default function PostBusinessPage() {
 
           <FormSection
             title="Business Hours"
-            description="Examples: 9:00 AM – 8:00 PM, Open 24 Hours, or Closed."
+            description="Use formats such as 9:00 AM – 8:00 PM, Open 24 Hours, or Closed."
           >
             <div className="grid gap-5 md:grid-cols-2">
               <HoursField
@@ -712,43 +810,55 @@ export default function PostBusinessPage() {
           </FormSection>
 
           <FormSection
-  title="Business Images"
-  description="Upload your business logo and cover photo."
->
-  <div className="grid gap-8 md:grid-cols-2">
+            title="Business Images"
+            description="Update the logo and business cover image."
+          >
+            <div className="grid gap-5 md:grid-cols-2">
+              <FormField
+                label="Logo image URL"
+                hint="You may also use a local path such as /business/logo.jpg."
+              >
+                <input
+                  type="text"
+                  value={form.logo_url}
+                  onChange={(event) =>
+                    updateField("logo_url", event.target.value)
+                  }
+                  className={inputClasses}
+                />
+              </FormField>
 
-    <BusinessImageUpload
-      label="Business Logo"
-      imageType="logo"
-      value={form.logo_url}
-      onChange={(url) => updateField("logo_url", url)}
-    />
+              <FormField
+                label="Cover image URL"
+                hint="You may also use a local path such as /business/store.jpg."
+              >
+                <input
+                  type="text"
+                  value={form.image_url}
+                  onChange={(event) =>
+                    updateField("image_url", event.target.value)
+                  }
+                  className={inputClasses}
+                />
+              </FormField>
+            </div>
+          </FormSection>
 
-    <BusinessImageUpload
-      label="Business Cover Photo"
-      imageType="cover"
-      value={form.image_url}
-      onChange={(url) => updateField("image_url", url)}
-    />
-
-  </div>
-</FormSection>
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
               <h2 className="font-black text-amber-950">
-                Before submitting
+                Approval notice
               </h2>
 
               <p className="mt-2 text-sm leading-6 text-amber-900">
-                Confirm that the information is accurate and that you are
-                authorized to create this business profile. The administrator
-                may reject misleading, duplicate, or incomplete submissions.
+                After saving, the business status will change to pending so an
+                administrator can review the updated information.
               </p>
             </div>
 
             <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <Link
-                href="/post-ad"
+                href="/businesses/my-businesses"
                 className="rounded-xl border border-slate-300 px-7 py-3 text-center font-black text-slate-700 transition hover:bg-slate-50"
               >
                 Cancel
@@ -756,12 +866,10 @@ export default function PostBusinessPage() {
 
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={saving}
                 className="rounded-xl bg-[#087531] px-8 py-3 font-black text-white transition hover:bg-[#064d2b] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {submitting
-                  ? "Submitting Business..."
-                  : "Submit Business for Approval"}
+                {saving ? "Saving Changes..." : "Save Business Changes"}
               </button>
             </div>
           </section>
@@ -787,7 +895,6 @@ function FormSection({
     <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
       <div className="border-b border-slate-200 pb-5">
         <h2 className="text-2xl font-black text-slate-950">{title}</h2>
-
         <p className="mt-2 leading-7 text-slate-600">{description}</p>
       </div>
 
@@ -813,18 +920,13 @@ function FormField({
     <label className={`block ${className}`}>
       <span className="font-black text-slate-800">
         {label}
-
-        {required ? (
-          <span className="ml-1 text-red-600">*</span>
-        ) : null}
+        {required ? <span className="ml-1 text-red-600">*</span> : null}
       </span>
 
       {children}
 
       {hint ? (
-        <span className="mt-2 block text-sm text-slate-500">
-          {hint}
-        </span>
+        <span className="mt-2 block text-sm text-slate-500">{hint}</span>
       ) : null}
     </label>
   );

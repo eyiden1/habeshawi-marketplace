@@ -1,4 +1,7 @@
 import Link from "next/link";
+import Card from "@/components/ui/Card";
+import Section from "@/components/ui/Section";
+import SectionHeader from "@/components/ui/SectionHeader";
 
 const sections = [
   {
@@ -10,16 +13,7 @@ const sections = [
     href: "/housing",
     button: "Browse Rentals",
     color: "bg-green-50",
-  },
-  {
-    title: "Marketplace",
-    amharic: "ገበያ",
-    icon: "🛍️",
-    description:
-      "Buy and sell cars, phones, furniture, electronics and community services.",
-    href: "/marketplace",
-    button: "Shop Marketplace",
-    color: "bg-blue-50",
+    iconColor: "bg-green-100",
   },
   {
     title: "Promotions",
@@ -30,69 +24,88 @@ const sections = [
     href: "/businesses",
     button: "View Promotions",
     color: "bg-yellow-50",
+    iconColor: "bg-yellow-100",
+  },
+  {
+    title: "Marketplace",
+    amharic: "ገበያ",
+    icon: "🛍️",
+    description:
+      "Buy and sell cars, phones, furniture, electronics and other useful items.",
+    href: "/marketplace",
+    button: "Shop Marketplace",
+    color: "bg-blue-50",
+    iconColor: "bg-blue-100",
   },
   {
     title: "Jobs",
     amharic: "ስራ",
     icon: "💼",
     description:
-      "Find your next opportunity or connect with qualified employees.",
+      "Find your next opportunity or connect with qualified local employees.",
     href: "/jobs",
     button: "Find Jobs",
     color: "bg-purple-50",
+    iconColor: "bg-purple-100",
   },
 ];
 
 export default function Categories() {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-16">
-      <div className="mx-auto mb-12 max-w-3xl text-center">
-        <h2 className="text-4xl font-black text-[#064d2b]">
-          Explore Habeshawi Marketplace
-        </h2>
+    <Section tone="soft">
+      <SectionHeader
+        eyebrow="Explore the Community"
+        title="Explore Habeshawi Marketplace"
+        description="Buy, sell, rent, find jobs and promote your business in one trusted community marketplace."
+        amharic="ይግዙ • ይሽጡ • ይከራዩ • ስራ ያግኙ • ንግድዎን ያስተዋውቁ"
+      />
 
-        <p className="mt-4 text-xl text-gray-600">
-          Buy • Sell • Rent • Find Jobs • Promote Your Business
-        </p>
-
-        <p className="mt-2 font-semibold text-[#087531]">
-          ይግዙ • ይሽጡ • ይከራዩ • ስራ ያግኙ • ንግድዎን ያስተዋውቁ
-        </p>
-      </div>
-
-      <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
         {sections.map((section) => (
           <Link
             key={section.title}
             href={section.href}
-            className={`${section.color} group rounded-3xl border border-gray-200 p-8 shadow-sm transition duration-300 hover:-translate-y-2 hover:shadow-xl`}
+            className="group block h-full"
           >
-            <div className="text-6xl">{section.icon}</div>
+            <Card
+              hover
+              padding="lg"
+              className={`flex h-full flex-col ${section.color}`}
+            >
+              <div
+                className={`flex h-16 w-16 items-center justify-center rounded-2xl text-4xl ${section.iconColor}`}
+              >
+                <span aria-hidden="true">{section.icon}</span>
+              </div>
 
-            <h3 className="mt-6 text-2xl font-black text-[#064d2b]">
-              {section.title}
-            </h3>
+              <h3 className="mt-6 text-2xl font-black text-[#064d2b] transition group-hover:text-[#087531]">
+                {section.title}
+              </h3>
 
-            <p className="mt-2 text-lg font-semibold text-[#087531]">
-              {section.amharic}
-            </p>
+              <p className="mt-2 text-lg font-bold text-[#087531]">
+                {section.amharic}
+              </p>
 
-            <p className="mt-5 min-h-[90px] text-gray-600 leading-7">
-              {section.description}
-            </p>
+              <p className="mt-5 flex-1 leading-7 text-slate-600">
+                {section.description}
+              </p>
 
-            <div className="mt-6 flex items-center justify-between">
-              <span className="rounded-full bg-white px-5 py-2 text-sm font-bold shadow">
-                {section.button}
-              </span>
+              <div className="mt-7 flex items-center justify-between">
+                <span className="rounded-full bg-white px-5 py-2 text-sm font-bold text-slate-800 shadow-sm">
+                  {section.button}
+                </span>
 
-              <span className="text-2xl transition group-hover:translate-x-2">
-                →
-              </span>
-            </div>
+                <span
+                  aria-hidden="true"
+                  className="text-2xl font-bold text-[#087531] transition group-hover:translate-x-1"
+                >
+                  →
+                </span>
+              </div>
+            </Card>
           </Link>
         ))}
       </div>
-    </section>
+    </Section>
   );
 }

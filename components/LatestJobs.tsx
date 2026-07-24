@@ -1,5 +1,8 @@
-import Link from "next/link";
 import JobCard from "@/components/jobs/JobCard";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import Section from "@/components/ui/Section";
+import SectionHeader from "@/components/ui/SectionHeader";
 import { getApprovedJobs } from "@/lib/jobs/queries";
 
 export default async function LatestJobs() {
@@ -7,82 +10,78 @@ export default async function LatestJobs() {
   const latestJobs = jobs.slice(0, 4);
 
   return (
-    <section className="bg-white py-16">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="mb-10 flex flex-wrap items-end justify-between gap-5">
-          <div>
-            <p className="font-bold uppercase tracking-wider text-[#087531]">
-              Community Opportunities
-            </p>
+    <Section tone="white">
+      <SectionHeader
+        eyebrow="Community Opportunities"
+        title="Latest Jobs"
+        description="Discover the newest approved job opportunities shared by our community throughout Washington, DC, Maryland, and Virginia."
+        amharic="አዳዲስ የስራ እድሎች"
+        actionHref="/jobs"
+        actionLabel="View All Jobs"
+      />
 
-            <h2 className="mt-2 text-3xl font-black text-[#064d2b] sm:text-4xl">
-              Latest Jobs
-            </h2>
-
-            <p className="mt-2 max-w-2xl text-slate-600">
-              Discover the newest approved job opportunities shared by our
-              community throughout the Washington DC, Maryland, and Virginia
-              area.
-            </p>
-
-            <p className="mt-2 font-semibold text-[#087531]">
-              አዳዲስ የስራ እድሎች
-            </p>
-          </div>
-
-          <Link
-            href="/jobs"
-            className="font-bold text-[#087531] transition hover:text-[#064d2b] hover:underline"
-          >
-            View All Jobs →
-          </Link>
+      {latestJobs.length > 0 ? (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {latestJobs.map((job) => (
+            <JobCard key={job.id} job={job} />
+          ))}
         </div>
-
-        {latestJobs.length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {latestJobs.map((job) => (
-              <JobCard key={job.id} job={job} />
-            ))}
+      ) : (
+        <Card
+          padding="lg"
+          className="border-dashed bg-slate-50 text-center"
+        >
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-green-100 text-3xl">
+            <span aria-hidden="true">💼</span>
           </div>
-        ) : (
-          <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-12 text-center">
-            <h3 className="text-2xl font-black text-slate-900">
-              No Jobs Available Yet
-            </h3>
 
-            <p className="mt-3 text-slate-600">
-              Be the first to post a job for the Habeshawi community.
+          <h3 className="mt-5 text-2xl font-black text-slate-900">
+            No Jobs Available Yet
+          </h3>
+
+          <p className="mx-auto mt-3 max-w-xl text-slate-600">
+            Be the first to post a job opportunity for the Habeshawi community.
+          </p>
+
+          <div className="mt-6 flex justify-center">
+            <Button href="/jobs/post" variant="primary">
+              Post a Job
+            </Button>
+          </div>
+        </Card>
+      )}
+
+      <Card
+        padding="lg"
+        className="mt-12 border-0 bg-[#064d2b] text-white shadow-lg"
+      >
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-black uppercase tracking-wider text-yellow-300">
+              Employers
             </p>
 
-            <Link
-              href="/jobs/post"
-              className="mt-6 inline-flex rounded-xl bg-[#087531] px-6 py-3 font-bold text-white transition hover:bg-[#064d2b]"
-            >
-              Post a Job
-            </Link>
-          </div>
-        )}
-
-        <div className="mt-12 rounded-3xl bg-[#064d2b] px-6 py-8 text-white sm:flex sm:items-center sm:justify-between sm:gap-8 lg:px-10">
-          <div>
-            <h3 className="text-2xl font-black">
+            <h3 className="mt-2 text-2xl font-black">
               Are You Hiring?
             </h3>
 
-            <p className="mt-2 max-w-2xl text-white/75">
-              Post your job opening and connect with Ethiopian and Eritrean job
-              seekers across the DMV area.
+            <p className="mt-2 max-w-2xl text-green-50">
+              Post your opportunity and connect with qualified job seekers
+              across the DMV Habeshawi community.
             </p>
           </div>
 
-          <Link
+          <Button
             href="/jobs/post"
-            className="mt-6 inline-flex shrink-0 items-center justify-center rounded-xl bg-yellow-400 px-6 py-3 font-black text-[#064d2b] transition hover:bg-yellow-300 sm:mt-0"
+            variant="secondary"
+            size="md"
+            className="shrink-0"
           >
             Post a Job
-          </Link>
+            <span aria-hidden="true">→</span>
+          </Button>
         </div>
-      </div>
-    </section>
+      </Card>
+    </Section>
   );
 }

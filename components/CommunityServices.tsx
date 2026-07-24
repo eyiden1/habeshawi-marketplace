@@ -1,4 +1,7 @@
 import Link from "next/link";
+import Card from "@/components/ui/Card";
+import Section from "@/components/ui/Section";
+import SectionHeader from "@/components/ui/SectionHeader";
 
 const services = [
   {
@@ -47,66 +50,49 @@ const services = [
 
 export default function CommunityServices() {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-16">
-      <div className="mb-10 flex flex-col items-start justify-between gap-5 md:flex-row md:items-end">
-        <div>
-          <p className="font-bold uppercase tracking-wider text-[#087531]">
-            Trusted Community Support
-          </p>
-
-          <h2 className="mt-2 text-3xl font-black text-[#064d2b] sm:text-4xl">
-            Community Services
-          </h2>
-
-          <p className="mt-3 max-w-2xl text-slate-600">
-            Find trusted professionals and essential services serving the
-            Habesha community.
-          </p>
-
-          <p className="mt-2 font-semibold text-[#087531]">
-            የማህበረሰብ አገልግሎቶች
-          </p>
-        </div>
-
-        <Link
-          href="/services"
-          className="rounded-xl bg-[#087531] px-5 py-3 font-bold text-white transition hover:bg-[#064d2b]"
-        >
-          View All Services →
-        </Link>
-      </div>
+    <Section tone="white">
+      <SectionHeader
+        eyebrow="Trusted Community Support"
+        title="Community Services"
+        description="Find trusted professionals and essential services serving the Habesha community."
+        amharic="የማህበረሰብ አገልግሎቶች"
+        actionHref="/services"
+        actionLabel="View All Services"
+      />
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {services.map((service) => (
           <Link
             key={service.id}
             href="/services"
-            className="group rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#087531]/30 hover:shadow-lg"
+            className="group block h-full"
           >
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-green-50 text-3xl transition group-hover:bg-green-100">
-              <span aria-hidden="true">{service.icon}</span>
-            </div>
+            <Card hover className="h-full">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-green-50 text-3xl transition group-hover:bg-green-100">
+                <span aria-hidden="true">{service.icon}</span>
+              </div>
 
-            <h3 className="mt-5 text-xl font-black text-slate-900 transition group-hover:text-[#087531]">
-              {service.title}
-            </h3>
+              <h3 className="mt-5 text-xl font-black text-slate-900 transition group-hover:text-[#087531]">
+                {service.title}
+              </h3>
 
-            <p className="mt-3 leading-6 text-slate-600">
-              {service.description}
-            </p>
+              <p className="mt-3 leading-6 text-slate-600">
+                {service.description}
+              </p>
 
-            <span className="mt-5 inline-flex items-center gap-2 font-bold text-[#087531]">
-              Explore Service
-              <span
-                aria-hidden="true"
-                className="transition group-hover:translate-x-1"
-              >
-                →
+              <span className="mt-5 inline-flex items-center gap-2 font-bold text-[#087531]">
+                Explore Service
+                <span
+                  aria-hidden="true"
+                  className="transition group-hover:translate-x-1"
+                >
+                  →
+                </span>
               </span>
-            </span>
+            </Card>
           </Link>
         ))}
       </div>
-    </section>
+    </Section>
   );
 }

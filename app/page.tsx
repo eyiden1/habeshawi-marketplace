@@ -1,7 +1,7 @@
 import Categories from "@/components/Categories";
 import CommunityServices from "@/components/CommunityServices";
 import FeaturedBusinesses from "@/components/FeaturedBusinesses";
-import FeaturedListings from "@/components/FeaturedListings";
+import FeaturedRentals from "@/components/FeaturedRentals";
 import FeaturedPromotions from "@/components/FeaturedPromotions";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
@@ -39,7 +39,7 @@ export default function Home() {
             </p>
           </div>
 
-          <FeaturedListings />
+          <FeaturedRentals />
         </div>
       </section>
 

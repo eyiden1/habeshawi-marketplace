@@ -69,7 +69,7 @@ function getStatusClasses(status: MarketplaceStatus) {
 
 function normalizeImageUrl(imageUrl: string | null) {
   if (!imageUrl) {
-    return "/eth.png";
+    return "/edefault-marketplace.png";
   }
 
   if (
@@ -80,7 +80,7 @@ function normalizeImageUrl(imageUrl: string | null) {
     return imageUrl;
   }
 
-  return "/eth.png";
+  return "/default-marketplace.png";
 }
 
 export default async function AdminMarketplacePage({
